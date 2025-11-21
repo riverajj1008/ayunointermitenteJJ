@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ayuno 16/8">
+    <meta name="theme-color" content="#667eea">
+    
+    <!-- iOS Splash Screens -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='430' height='932'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23667eea;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23764ba2;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='430' height='932' fill='url(%23grad)' /%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='60' fill='white' text-anchor='middle' dy='.3em'%3E💪%3C/text%3E%3C/svg%3E">
+    
+    <!-- iOS Icon -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23667eea;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23764ba2;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' fill='url(%23grad)' rx='40' /%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='80' text-anchor='middle' dy='.35em'%3E💪%3C/text%3E%3C/svg%3E">
+    
+    <title>Ayuno Intermitente 16/8 - Modo Juego</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            padding-top: max(env(safe-area-inset-top), 20px);
+            padding-bottom: max(env(safe-area-inset-bottom), 20px);
+            padding-left: max(env(safe-area-inset-left), 10px);
+            padding-right: max(env(safe-area-inset-right), 10px);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding-bottom: 20px;
+        }
+
+        /* Install Prompt */
+        .install-prompt {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 10px;
+            right: 10px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 9999;
+            animation: slideUp 0.5s ease;
+        }
+
+        .install-prompt.show {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .install-prompt h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .install-prompt p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .install-prompt button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            width: 100%;
+            font-size: 1em;
+        }
+
+        .close-install {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #999;
+            cursor: pointer;
+            width: 30px;
+            padding: 0;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .player-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+
+        .player-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .player-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 3px;
+        }
+
+        .player-title {
+            color: #999;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .xp-bar-container {
+            background: #e0e0e0;
+            height: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .xp-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #56ab2f, #a8e063);
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .level-badge {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+
+        .level-number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .level-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:active {
+            transform: scale(0.95);
+        }
+
+        .stat-icon {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.75em;
+            margin-top: 3px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            background: white;
+            padding: 8px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            padding: 10px 15px;
+            border: none;
+            background: transparent;
+            color: #666;
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .tab-btn:active {
+            transform: scale(0.95);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        @media (min-width: 768px) {
+            .calendar-grid {
+                grid-template-columns: repeat(4, 1fr);
+                padding: 25px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .calendar-grid {
+                grid-template-columns: repeat(7, 1fr);
+                padding: 30px;
+            }
+        }
+
+        .day-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .day-card:active {
+            transform: scale(0.95);
+        }
+
+        .day-card.completed {
+            background: linear-gradient(135deg, #56ab2f20, #a8e06320);
+            border-color: #56ab2f;
+        }
+
+        .day-card.completed::before {
+            content: "🏆";
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 1.2em;
+        }
+
+        .day-card.partial {
+            background: linear-gradient(135deg, #ffc10720, #ff980020);
+            border-color: #ffc107;
+        }
+
+        .day-card.today {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.7); }
+        }
+
+        .day-points {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.75em;
+        }
+
+        .day-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 3px;
+            margin-top: 20px;
+        }
+
+        .day-week {
+            font-size: 0.7em;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .day-status {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: auto;
+        }
+
+        .meal-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75em;
+            color: #666;
+        }
+
+        .meal-checkbox input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .week-label {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        .combo-meter {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .combo-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-align: center;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .combo-label {
+            text-align: center;
+            color: #666;
+            font-weight: bold;
+            margin-top: 8px;
+            font-size: 0.9em;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .achievement-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .achievement-card:active {
+            transform: scale(0.95);
+        }
+
+        .achievement-card.unlocked {
+            border-color: #56ab2f;
+            background: linear-gradient(135deg, #56ab2f10, #a8e06310);
+        }
+
+        .achievement-card.locked {
+            opacity: 0.6;
+            filter: grayscale(0.5);
+        }
+
+        .achievement-icon {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .achievement-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .achievement-description {
+            text-align: center;
+            color: #666;
+            font-size: 0.85em;
+            margin-bottom: 12px;
+        }
+
+        .achievement-reward {
+            background: linear-gradient(135deg, #f093fb20, #f5576c20);
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            color: #f5576c;
+            font-size: 0.9em;
+        }
+
+        .progress-bar-small {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill-small {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .challenges-container {
+            display: grid;
+            gap: 15px;
+        }
+
+        .challenge-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
+        }
+
+        .challenge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .challenge-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .challenge-reward-badge {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .challenge-description {
+            color: #666;
+            margin-bottom: 12px;
+            line-height: 1.5;
+            font-size: 0.9em;
+        }
+
+        .challenge-progress-text {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .shop-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .shop-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .shop-item:active {
+            transform: scale(0.95);
+        }
+
+        .shop-icon {
+            font-size: 3.5em;
+            margin-bottom: 12px;
+        }
+
+        .shop-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .shop-price {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 15px;
+            display: inline-block;
+            margin: 8px 0;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .shop-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .shop-btn:active {
+            transform: scale(0.95);
+        }
+
+        .shop-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: #999;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            background: #f0f0f0;
+        }
+
+        .close-modal:active {
+            transform: scale(0.9);
+        }
+
+        .meal-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 12px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .meal-section h3 {
+            color: #764ba2;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .meal-section ul {
+            list-style: none;
+            padding-left: 15px;
+        }
+
+        .meal-section li {
+            margin: 6px 0;
+            color: #555;
+            line-height: 1.5;
+            font-size: 0.9em;
+        }
+
+        .meal-section li:before {
+            content: "✓";
+            color: #56ab2f;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .points-earned {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 15px 0;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.05em;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .save-btn:active {
+            transform: scale(0.95);
+        }
+
+        .notification {
+            position: fixed;
+            top: max(env(safe-area-inset-top), 20px);
+            right: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, #56ab2f, #a8e063);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 2000;
+            animation: slideIn 0.5s ease;
+            display: none;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-icon {
+            font-size: 5em;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-icon">💪</div>
+        <div class="loading-text">Cargando tu progreso...</div>
+    </div>
+
+    <!-- Install Prompt -->
+    <div class="install-prompt" id="installPrompt">
+        <button class="close-install" onclick="closeInstallPrompt()">×</button>
+        <h3>📱 Agregar a Pantalla de Inicio</h3>
+        <p>Para una mejor experiencia, agrega esta app a tu pantalla de inicio:</p>
+        <p style="font-size: 0.9em; color: #999;">1. Toca el botón compartir <strong>📤</strong><br>
+        2. Selecciona "Agregar a pantalla de inicio"<br>
+        3. Toca "Agregar"</p>
+        <button onclick="closeInstallPrompt()">Entendido ✓</button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="player-profile">
+                <div class="avatar" id="playerAvatar">💪</div>
+                <div class="player-info">
+                    <div class="player-name" id="playerName">Guerrero del Ayuno</div>
+                    <div class="player-title" id="playerTitle">Aprendiz de la Disciplina</div>
+                    <div class="xp-bar-container">
+                        <div class="xp-bar" id="xpBar">
+                            <span id="xpText">0 / 100 XP</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="level-badge">
+                    <div class="level-number" id="levelNumber">1</div>
+                    <div class="level-label">NIVEL</div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-number" id="totalPoints">0</div>
+                    <div class="stat-label">Puntos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-number" id="currentStreak">0</div>
+                    <div class="stat-label">Racha</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-number" id="achievementsUnlocked">0</div>
+                    <div class="stat-label">Logros</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-number" id="daysCompleted">0</div>
+                    <div class="stat-label">Días</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-number" id="comboMultiplier">x1</div>
+                    <div class="stat-label">Combo</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('calendar')">📅 Calendario</button>
+            <button class="tab-btn" onclick="switchTab('achievements')">🏆 Logros</button>
+            <button class="tab-btn" onclick="switchTab('challenges')">🎯 Desafíos</button>
+            <button class="tab-btn" onclick="switchTab('shop')">🛒 Tienda</button>
+        </div>
+
+        <!-- TAB: Calendario -->
+        <div id="calendar" class="tab-content active">
+            <div class="combo-meter">
+                <div class="combo-number" id="comboDisplay">0</div>
+                <div class="combo-label">🔥 COMBO DE DÍAS</div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+
+        <!-- TAB: Logros -->
+        <div id="achievements" class="tab-content">
+            <div class="achievements-grid" id="achievementsGrid"></div>
+        </div>
+
+        <!-- TAB: Desafíos -->
+        <div id="challenges" class="tab-content">
+            <div class="challenges-container" id="challengesContainer"></div>
+        </div>
+
+        <!-- TAB: Tienda -->
+        <div id="shop" class="tab-content">
+            <div style="background: white; padding: 20px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                <h2 style="color: #667eea; margin-bottom: 12px; font-size: 1.3em;">💰 Tus Puntos: <span id="shopPoints">0</span></h2>
+                <p style="color: #666; font-size: 0.9em;">Canjea tus puntos por recompensas especiales!</p>
+            </div>
+            <div class="shop-container" id="shopContainer"></div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="dayModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">×</span>
+            <h2 style="color: #667eea; margin-bottom: 15px; font-size: 1.4em;" id="modalTitle">Día 1</h2>
+            <div id="modalMeals"></div>
+            <div class="points-earned" id="pointsEarned">
+                🎯 Completa las 3 comidas!
+            </div>
+            <button class="save-btn" onclick="saveDay()">💾 Guardar Progreso</button>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // [El mismo JavaScript del archivo anterior, pero con mejoras para PWA]
+        const weeklyMenu = {
+            1: {
+                comida1: { time: "12:00", title: "Omelette con Verduras", items: ["2-3 huevos con espinaca, champiñones y jitomate", "¼-½ aguacate", "2 tortillas de maíz"] },
+                snack: { time: "16:00", title: "Snack Proteico", items: ["1 yogurt griego natural", "Nueces o almendras", "½ manzana"] },
+                comida2: { time: "19:30", title: "Pollo con Ensalada", items: ["Pechuga de pollo a la plancha", "Ensalada grande", "½ camote o frijoles"] }
+            },
+            2: {
+                comida1: { time: "12:00", title: "Bowl de Atún", items: ["1 taza arroz integral", "Atún en agua", "Verduras salteadas", "¼ aguacate"] },
+                snack: { time: "16:00", title: "Vegetales con Hummus", items: ["Pepino y zanahoria", "Hummus o jocoque"] },
+                comida2: { time: "19:30", title: "Tacos de Carne", items: ["Carne magra en 3 tortillas", "Nopales asados", "Pico de gallo"] }
+            },
+            3: {
+                comida1: { time: "12:00", title: "Power Salad", items: ["Hojas verdes", "Pollo o pavo", "Garbanzos/lentejas", "Semillas"] },
+                snack: { time: "16:00", title: "Manzana con Crema", items: ["1 manzana", "Crema de cacahuate"] },
+                comida2: { time: "19:30", title: "Pescado al Horno", items: ["Filete de pescado", "Verduras al vapor", "½ taza quinoa"] }
+            },
+            4: {
+                comida1: { time: "12:00", title: "Huevos a la Mexicana", items: ["Huevos con jitomate, cebolla, chile", "2 tortillas maíz", "Frijoles negros"] },
+                snack: { time: "16:00", title: "Yogurt con Nueces", items: ["Yogurt griego", "Nueces"] },
+                comida2: { time: "19:30", title: "Fajitas de Pollo", items: ["Fajitas con pimiento y cebolla", "Guacamole", "2-3 tortillas"] }
+            },
+            5: {
+                comida1: { time: "12:00", title: "Burrito Bowl", items: ["Arroz integral", "Frijoles", "Carne molida magra", "Verduras"] },
+                snack: { time: "16:00", title: "Pepino con Semillas", items: ["Pepino con limón", "Semillas variadas"] },
+                comida2: { time: "19:30", title: "Pavo al Horno", items: ["Pechuga de pavo", "Puré de camote", "Ensalada"] }
+            },
+            6: {
+                comida1: { time: "12:00", title: "Tostadas de Pollo", items: ["Tostadas horneadas", "Pollo deshebrado", "Lechuga, jitomate"] },
+                snack: { time: "16:00", title: "Pera con Almendras", items: ["1 pera", "10-15 almendras"] },
+                comida2: { time: "19:30", title: "Chile Relleno", items: ["Chile con queso panela", "Ensalada de nopales", "Arroz"] }
+            },
+            7: {
+                comida1: { time: "12:00", title: "Chilaquiles (Flex)", items: ["Chilaquiles verdes/rojos", "Pollo", "Crema y queso moderado"] },
+                snack: { time: "16:00", title: "Yogurt con Fruta", items: ["Yogurt griego con fruta", "Semillas"] },
+                comida2: { time: "19:30", title: "Comida Social", items: ["Opción ligera", "Evitar refrescos", "Agua simple"] }
+            }
+        };
+
+        const achievements = [
+            { id: 1, name: "Primer Paso", icon: "👣", description: "Completa tu primer día perfecto", requirement: "days", value: 1, points: 50, unlocked: false },
+            { id: 2, name: "Principiante", icon: "🌱", description: "Alcanza racha de 3 días", requirement: "streak", value: 3, points: 100, unlocked: false },
+            { id: 3, name: "Disciplinado", icon: "💎", description: "Completa 7 días perfectos", requirement: "days", value: 7, points: 200, unlocked: false },
+            { id: 4, name: "Semana de Oro", icon: "⭐", description: "Racha de 7 días consecutivos", requirement: "streak", value: 7, points: 300, unlocked: false },
+            { id: 5, name: "Guerrero", icon: "⚔️", description: "Completa 15 días perfectos", requirement: "days", value: 15, points: 500, unlocked: false },
+            { id: 6, name: "Imparable", icon: "🔥", description: "Racha de 14 días consecutivos", requirement: "streak", value: 14, points: 750, unlocked: false },
+            { id: 7, name: "Maestro", icon: "🎓", description: "Completa 21 días perfectos", requirement: "days", value: 21, points: 1000, unlocked: false },
+            { id: 8, name: "Leyenda", icon: "👑", description: "Completa los 30 días", requirement: "days", value: 30, points: 2000, unlocked: false },
+            { id: 9, name: "Racha Épica", icon: "🌟", description: "Racha de 21 días", requirement: "streak", value: 21, points: 1500, unlocked: false },
+            { id: 10, name: "Perfección", icon: "💯", description: "30 días consecutivos", requirement: "streak", value: 30, points: 5000, unlocked: false }
+        ];
+
+        const challenges = [
+            { id: 1, name: "Desafío del Ayuno Perfecto", description: "Completa 5 días perfectos esta semana", progress: 0, goal: 5, reward: 250, active: true },
+            { id: 2, name: "Maestro de la Hidratación", description: "Bebe 2L de agua por 7 días", progress: 0, goal: 7, reward: 200, active: true },
+            { id: 3, name: "Variedad Nutritiva", description: "Come pescado 3 veces esta semana", progress: 0, goal: 3, reward: 150, active: true },
+            { id: 4, name: "Snack Saludable", description: "Completa todos los snacks de la semana", progress: 0, goal: 7, reward: 175, active: true }
+        ];
+
+        const shopItems = [
+            { id: 1, name: "Día Libre", icon: "🎉", description: "Descanso sin perder racha", price: 500, owned: 0 },
+            { id: 2, name: "Doble XP", icon: "⚡", description: "Duplica puntos por 3 días", price: 750, owned: 0 },
+            { id: 3, name: "Avatar Premium", icon: "💎", description: "Avatar especial", price: 1000, owned: 0 },
+            { id: 4, name: "Boost de Racha", icon: "🔥", description: "Protege racha 2 días", price: 600, owned: 0 },
+            { id: 5, name: "Menú Custom", icon: "📋", description: "Crea tu menú", price: 400, owned: 0 }
+        ];
+
+        let gameState = JSON.parse(localStorage.getItem('fastingGame')) || {
+            level: 1,
+            xp: 0,
+            totalPoints: 0,
+            currentStreak: 0,
+            maxStreak: 0,
+            daysCompleted: 0,
+            achievements: {},
+            daysData: {},
+            startDate: new Date().toISOString(),
+            shopItems: {},
+            combo: 1,
+            mealCounts: { meal1: 0, snack: 0, meal2: 0 },
+            varietyDays: new Set()
+        };
+
+        let currentDay = 1;
+
+        const levels = [
+            { level: 1, xp: 0, title: "Aprendiz de la Disciplina", avatar: "💪" },
+            { level: 2, xp: 100, title: "Guerrero Novato", avatar: "🥋" },
+            { level: 3, xp: 250, title: "Explorador del Ayuno", avatar: "🗺️" },
+            { level: 4, xp: 500, title: "Guardián Disciplinado", avatar: "🛡️" },
+            { level: 5, xp: 800, title: "Maestro del Equilibrio", avatar: "⚖️" },
+            { level: 6, xp: 1200, title: "Campeón de la Voluntad", avatar: "🏆" },
+            { level: 7, xp: 1700, title: "Leyenda del Ayuno", avatar: "👑" },
+            { level: 8, xp: 2500, title: "Dios del Autocontrol", avatar: "⚡" }
+        ];
+
+        function initGame() {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }, 1500);
+
+            loadGameState();
+            initCalendar();
+            initAchievements();
+            initChallenges();
+            initShop();
+            updateAllStats();
+            
+            // Show install prompt if not standalone
+            if (!window.matchMedia('(display-mode: standalone)').matches && !localStorage.getItem('installPromptShown')) {
+                setTimeout(() => {
+                    document.getElementById('installPrompt').classList.add('show');
+                }, 3000);
+            }
+        }
+
+        function closeInstallPrompt() {
+            document.getElementById('installPrompt').classList.remove('show');
+            localStorage.setItem('installPromptShown', 'true');
+        }
+
+        function loadGameState() {
+            gameState = JSON.parse(localStorage.getItem('fastingGame')) || gameState;
+            if (typeof gameState.varietyDays === 'object' && !Array.isArray(gameState.varietyDays)) {
+                gameState.varietyDays = new Set(Object.keys(gameState.varietyDays));
+            }
+        }
+
+        function saveGameState() {
+            const saveState = {
+                ...gameState,
+                varietyDays: Array.from(gameState.varietyDays)
+            };
+            localStorage.setItem('fastingGame', JSON.stringify(saveState));
+        }
+
+        function initCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            for (let week = 1; week <= 5; week++) {
+                const weekLabel = document.createElement('div');
+                weekLabel.className = 'week-label';
+                weekLabel.textContent = `⚔️ Semana ${week}`;
+                grid.appendChild(weekLabel);
+
+                const daysInWeek = week === 5 ? 2 : 7;
+                for (let day = 1; day <= daysInWeek; day++) {
+                    const dayNum = (week - 1) * 7 + day;
+                    if (dayNum <= 30) {
+                        const dayCard = createDayCard(dayNum, week);
+                        grid.appendChild(dayCard);
+                    }
+                }
+            }
+        }
+
+        function createDayCard(dayNum, week) {
+            const card = document.createElement('div');
+            card.className = 'day-card';
+            
+            const dayOfWeek = ((dayNum - 1) % 7) + 1;
+            const dayData = gameState.daysData[dayNum] || { comida1: false, snack: false, comida2: false };
+
+            const checkedCount = [dayData.comida1, dayData.snack, dayData.comida2].filter(Boolean).length;
+            const dayPoints = calculateDayPoints(checkedCount);
+            
+            if (checkedCount === 3) card.classList.add('completed');
+            else if (checkedCount > 0) card.classList.add('partial');
+
+            if (dayNum === getCurrentDay()) card.classList.add('today');
+
+            card.innerHTML = `
+                ${dayPoints > 0 ? `<div class="day-points">+${dayPoints}</div>` : ''}
+                <div class="day-number">Día ${dayNum}</div>
+                <div class="day-week">Semana ${week}</div>
+                <div class="day-status">
+                    <div class="meal-checkbox">
+                        <input type="checkbox" ${dayData.comida1 ? 'checked' : ''} onclick="event.stopPropagation()">
+                        <span>☀️ 12:00</span>
+                    </div>
+                    <div class="meal-checkbox">
+                        <input type="checkbox" ${dayData.snack ? 'checked' : ''} onclick="event.stopPropagation()">
+                        <span>🥤 16:00</span>
+                    </div>
+                    <div class="meal-checkbox">
+                        <input type="checkbox" ${dayData.comida2 ? 'checked' : ''} onclick="event.stopPropagation()">
+                        <span>🌙 19:30</span>
+                    </div>
+                </div>
+            `;
+
+            card.onclick = () => openDayModal(dayNum, week, dayOfWeek);
+            return card;
+        }
+
+        function calculateDayPoints(checkedCount) {
+            const basePoints = checkedCount * 10;
+            const comboMultiplier = Math.min(gameState.combo, 5);
+            return Math.floor(basePoints * comboMultiplier);
+        }
+
+        function getCurrentDay() {
+            const start = new Date(gameState.startDate);
+            const today = new Date();
+            const diffTime = Math.abs(today - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return Math.min(diffDays, 30);
+        }
+
+        function openDayModal(dayNum, week, dayOfWeek) {
+            currentDay = dayNum;
+            const modal = document.getElementById('dayModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMeals = document.getElementById('modalMeals');
+
+            modalTitle.textContent = `🎮 Día ${dayNum}`;
+
+            const menu = weeklyMenu[dayOfWeek];
+            const dayData = gameState.daysData[dayNum] || { comida1: false, snack: false, comida2: false };
+
+            modalMeals.innerHTML = `
+                <div class="meal-section">
+                    <h3>🍳 ${menu.comida1.title}</h3>
+                    <ul>${menu.comida1.items.map(item => `<li>${item}</li>`).join('')}</ul>
+                    <label style="display: flex; align-items: center; gap: 10px; margin-top: 12px; cursor: pointer;">
+                        <input type="checkbox" id="check_comida1" ${dayData.comida1 ? 'checked' : ''} style="width: 18px; height: 18px;">
+                        <span style="font-weight: bold;">✅ +10 pts x${gameState.combo}</span>
+                    </label>
+                </div>
+                <div class="meal-section">
+                    <h3>🥤 ${menu.snack.title}</h3>
+                    <ul>${menu.snack.items.map(item => `<li>${item}</li>`).join('')}</ul>
+                    <label style="display: flex; align-items: center; gap: 10px; margin-top: 12px; cursor: pointer;">
+                        <input type="checkbox" id="check_snack" ${dayData.snack ? 'checked' : ''} style="width: 18px; height: 18px;">
+                        <span style="font-weight: bold;">✅ +10 pts x${gameState.combo}</span>
+                    </label>
+                </div>
+                <div class="meal-section">
+                    <h3>🍽️ ${menu.comida2.title}</h3>
+                    <ul>${menu.comida2.items.map(item => `<li>${item}</li>`).join('')}</ul>
+                    <label style="display: flex; align-items: center; gap: 10px; margin-top: 12px; cursor: pointer;">
+                        <input type="checkbox" id="check_comida2" ${dayData.comida2 ? 'checked' : ''} style="width: 18px; height: 18px;">
+                        <span style="font-weight: bold;">✅ +10 pts x${gameState.combo}</span>
+                    </label>
+                </div>
+            `;
+
+            updatePointsPreview();
+            modal.classList.add('active');
+        }
+
+        function updatePointsPreview() {
+            const c1 = document.getElementById('check_comida1')?.checked || false;
+            const s = document.getElementById('check_snack')?.checked || false;
+            const c2 = document.getElementById('check_comida2')?.checked || false;
+            
+            const count = [c1, s, c2].filter(Boolean).length;
+            const points = calculateDayPoints(count);
+            
+            const pointsEarned = document.getElementById('pointsEarned');
+            if (count === 3) {
+                pointsEarned.innerHTML = `🎉 ¡DÍA PERFECTO! +${points} pts + 50 XP`;
+                pointsEarned.style.background = 'linear-gradient(135deg, #56ab2f, #a8e063)';
+            } else if (count > 0) {
+                pointsEarned.innerHTML = `⭐ Progreso! +${points} pts`;
+                pointsEarned.style.background = 'linear-gradient(135deg, #ffc107, #ff9800)';
+            } else {
+                pointsEarned.innerHTML = `🎯 Completa las 3 comidas!`;
+                pointsEarned.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+            }
+        }
+
+        function saveDay() {
+            const comida1 = document.getElementById('check_comida1').checked;
+            const snack = document.getElementById('check_snack').checked;
+            const comida2 = document.getElementById('check_comida2').checked;
+
+            const oldData = gameState.daysData[currentDay] || { comida1: false, snack: false, comida2: false };
+            const oldCount = [oldData.comida1, oldData.snack, oldData.comida2].filter(Boolean).length;
+            const newCount = [comida1, snack, comida2].filter(Boolean).length;
+
+            gameState.daysData[currentDay] = { comida1, snack, comida2 };
+
+            if (comida1 && !oldData.comida1) gameState.mealCounts.meal1++;
+            if (snack && !oldData.snack) gameState.mealCounts.snack++;
+            if (comida2 && !oldData.comida2) gameState.mealCounts.meal2++;
+
+            const dayOfWeek = ((currentDay - 1) % 7) + 1;
+            if (newCount === 3) gameState.varietyDays.add(dayOfWeek);
+
+            const pointsGained = calculateDayPoints(newCount) - calculateDayPoints(oldCount);
+            if (pointsGained > 0) {
+                gameState.totalPoints += pointsGained;
+                
+                if (newCount === 3 && oldCount < 3) {
+                    const xpGained = 50;
+                    gameState.xp += xpGained;
+                    checkLevelUp();
+                    
+                    gameState.daysCompleted++;
+                    updateStreak();
+                    
+                    showNotification(`🎉 ¡Día perfecto! +${pointsGained} pts, +${xpGained} XP`);
+                } else {
+                    showNotification(`⭐ Guardado! +${pointsGained} pts`);
+                }
+            }
+
+            checkAchievements();
+            saveGameState();
+            closeModal();
+            initCalendar();
+            updateAllStats();
+        }
+
+        function updateStreak() {
+            let streak = 0;
+            for (let i = getCurrentDay(); i >= 1; i--) {
+                const dayData = gameState.daysData[i];
+                if (dayData && dayData.comida1 && dayData.snack && dayData.comida2) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+            
+            gameState.currentStreak = streak;
+            gameState.maxStreak = Math.max(gameState.maxStreak, streak);
+            gameState.combo = Math.min(streak, 5);
+        }
+
+        function checkLevelUp() {
+            const currentLevel = levels.findIndex(l => gameState.xp < l.xp);
+            const newLevel = currentLevel === -1 ? levels.length : currentLevel;
+            
+            if (newLevel > gameState.level) {
+                gameState.level = newLevel;
+                showNotification(`🎊 ¡LEVEL UP! Nivel ${newLevel}`);
+            }
+        }
+
+        function checkAchievements() {
+            achievements.forEach(achievement => {
+                if (!gameState.achievements[achievement.id]) {
+                    let unlocked = false;
+                    
+                    switch(achievement.requirement) {
+                        case 'days':
+                            unlocked = gameState.daysCompleted >= achievement.value;
+                            break;
+                        case 'streak':
+                            unlocked = gameState.currentStreak >= achievement.value;
+                            break;
+                        case 'points':
+                            unlocked = gameState.totalPoints >= achievement.value;
+                            break;
+                    }
+                    
+                    if (unlocked) {
+                        gameState.achievements[achievement.id] = true;
+                        gameState.totalPoints += achievement.points;
+                        showNotification(`🏆 ${achievement.name} (+${achievement.points} pts)`);
+                    }
+                }
+            });
+        }
+
+        function initAchievements() {
+            const grid = document.getElementById('achievementsGrid');
+            grid.innerHTML = '';
+
+            achievements.forEach(achievement => {
+                const unlocked = gameState.achievements[achievement.id] || false;
+                const card = document.createElement('div');
+                card.className = `achievement-card ${unlocked ? 'unlocked' : 'locked'}`;
+                
+                let progressHTML = '';
+                if (!unlocked) {
+                    let current = 0;
+                    switch(achievement.requirement) {
+                        case 'days': current = gameState.daysCompleted; break;
+                        case 'streak': current = gameState.currentStreak; break;
+                        case 'points': current = gameState.totalPoints; break;
+                    }
+                    const progress = Math.min((current / achievement.value) * 100, 100);
+                    progressHTML = `
+                        <div style="margin-top: 10px;">
+                            <div style="font-size: 0.8em; color: #999;">${current} / ${achievement.value}</div>
+                            <div class="progress-bar-small">
+                                <div class="progress-fill-small" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-name">${achievement.name}</div>
+                    <div class="achievement-description">${achievement.description}</div>
+                    ${unlocked ? '<div class="achievement-reward">✅ DESBLOQUEADO</div>' : `<div class="achievement-reward">🎁 ${achievement.points} pts</div>`}
+                    ${progressHTML}
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function initChallenges() {
+            const container = document.getElementById('challengesContainer');
+            container.innerHTML = '';
+
+            challenges.forEach(challenge => {
+                const progress = Math.min((challenge.progress / challenge.goal) * 100, 100);
+                const card = document.createElement('div');
+                card.className = 'challenge-card';
+                
+                card.innerHTML = `
+                    <div class="challenge-header">
+                        <div class="challenge-title">${challenge.name}</div>
+                        <div class="challenge-reward-badge">🎁 ${challenge.reward} pts</div>
+                    </div>
+                    <div class="challenge-description">${challenge.description}</div>
+                    <div class="progress-bar-small" style="height: 10px;">
+                        <div class="progress-fill-small" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="challenge-progress-text">${challenge.progress} / ${challenge.goal}</div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        function initShop() {
+            const container = document.getElementById('shopContainer');
+            container.innerHTML = '';
+
+            shopItems.forEach(item => {
+                const owned = gameState.shopItems[item.id] || 0;
+                const canAfford = gameState.totalPoints >= item.price;
+                
+                const card = document.createElement('div');
+                card.className = 'shop-item';
+                
+                card.innerHTML = `
+                    <div class="shop-icon">${item.icon}</div>
+                    <div class="shop-name">${item.name}</div>
+                    <div style="color: #666; font-size: 0.85em; margin: 8px 0;">${item.description}</div>
+                    <div class="shop-price">💰 ${item.price} pts</div>
+                    ${owned > 0 ? `<div style="color: #56ab2f; font-weight: bold; margin: 8px 0;">✅ x${owned}</div>` : ''}
+                    <button class="shop-btn" ${!canAfford ? 'disabled' : ''} onclick="buyItem(${item.id})">
+                        ${canAfford ? '🛒 Comprar' : '🔒 Insuficiente'}
+                    </button>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        function buyItem(itemId) {
+            const item = shopItems.find(i => i.id === itemId);
+            if (gameState.totalPoints >= item.price) {
+                gameState.totalPoints -= item.price;
+                gameState.shopItems[itemId] = (gameState.shopItems[itemId] || 0) + 1;
+                saveGameState();
+                showNotification(`🛒 ¡Comprado! ${item.name}`);
+                initShop();
+                updateAllStats();
+            }
+        }
+
+        function updateAllStats() {
+            const levelInfo = levels[gameState.level - 1] || levels[0];
+            const nextLevel = levels[gameState.level] || levels[levels.length - 1];
+            const xpProgress = ((gameState.xp - levelInfo.xp) / (nextLevel.xp - levelInfo.xp)) * 100;
+            
+            document.getElementById('playerTitle').textContent = levelInfo.title;
+            document.getElementById('playerAvatar').textContent = levelInfo.avatar;
+            document.getElementById('levelNumber').textContent = gameState.level;
+            document.getElementById('xpBar').style.width = xpProgress + '%';
+            document.getElementById('xpText').textContent = `${gameState.xp} / ${nextLevel.xp} XP`;
+
+            document.getElementById('totalPoints').textContent = gameState.totalPoints;
+            document.getElementById('currentStreak').textContent = gameState.currentStreak;
+            document.getElementById('daysCompleted').textContent = gameState.daysCompleted;
+            document.getElementById('comboMultiplier').textContent = 'x' + gameState.combo;
+            document.getElementById('comboDisplay').textContent = gameState.currentStreak;
+            
+            const achievementsCount = Object.keys(gameState.achievements).length;
+            document.getElementById('achievementsUnlocked').textContent = `${achievementsCount}/${achievements.length}`;
+            document.getElementById('shopPoints').textContent = gameState.totalPoints;
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function closeModal() {
+            document.getElementById('dayModal').classList.remove('active');
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'achievements') initAchievements();
+            if (tabName === 'challenges') initChallenges();
+            if (tabName === 'shop') initShop();
+        }
+
+        document.addEventListener('change', function(e) {
+            if (e.target.id && e.target.id.startsWith('check_')) {
+                updatePointsPreview();
+            }
+        });
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('dayModal');
+            if (event.target === modal) closeModal();
+        }
+
+        // Prevent iOS bounce scroll
+        document.body.addEventListener('touchmove', function(e) {
+            if (e.target.closest('.modal-content') || e.target.closest('.calendar-grid')) {
+                return;
+            }
+        }, { passive: false });
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
